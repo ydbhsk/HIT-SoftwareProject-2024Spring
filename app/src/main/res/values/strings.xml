@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">My Test3</string>
+    <string name="title_activity_admin">AdminActivity</string>
+    <string name="title_activity_user">UserActivity</string>
+    <string name="title_activity_history">HistoryActivity</string>
+    <string name="title_activity_reserve">ReserveActivity</string>
+    <string name="title_activity_edit_room">EditRoomActivity</string>
+</resources>
