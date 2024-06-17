@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Test3"
+rootProject.name = "Classroom Management System"
 include(":app")
  

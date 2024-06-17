@@ -1,11 +1,10 @@
-package com.example.mytest3.utils;
+package com.example.ClassroomManagementSystem.utils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.widget.Toast;
 
-//import com.example.mytest3.AdminActivity;
-import com.example.mytest3.MainActivity;
+//import com.example.ClassroomManagementSystem.AdminActivity;
+
 
 public class Login {
     public static int tryLog(String id, String password, Context context){

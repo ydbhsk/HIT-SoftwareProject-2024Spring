@@ -1,4 +1,4 @@
-package com.example.mytest3
+package com.example.ClassroomManagementSystem
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -22,9 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.mytest3.ui.theme.MyTest3Theme
-import com.example.mytest3.utils.Classroom
-import com.example.mytest3.utils.ClassroomDao
+import com.example.ClassroomManagementSystem.ui.theme.MyTest3Theme
+import com.example.ClassroomManagementSystem.utils.Classroom
+import com.example.ClassroomManagementSystem.utils.ClassroomDao
 
 @Composable
 fun EditScreen(modifier: Modifier,navController: NavController) {

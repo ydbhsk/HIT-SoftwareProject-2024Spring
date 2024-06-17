@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Test3</string>
+    <string name="app_name">Classroom Management System</string>
     <string name="title_activity_admin">AdminActivity</string>
     <string name="title_activity_user">UserActivity</string>
     <string name="title_activity_history">HistoryActivity</string>

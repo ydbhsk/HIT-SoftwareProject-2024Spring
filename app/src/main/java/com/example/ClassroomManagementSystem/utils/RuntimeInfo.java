@@ -1,6 +1,4 @@
-package com.example.mytest3.utils;
-
-import android.content.Context;
+package com.example.ClassroomManagementSystem.utils;
 
 public class RuntimeInfo {
     public User loggedUser;

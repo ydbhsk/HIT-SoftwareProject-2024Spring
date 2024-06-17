@@ -1,9 +1,5 @@
-package com.example.mytest3
+package com.example.ClassroomManagementSystem
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,14 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.mytest3.ui.theme.MyTest3Theme
-import com.example.mytest3.utils.Reservation
-import com.example.mytest3.utils.ReservationDao
-import com.example.mytest3.utils.Reserve
+import com.example.ClassroomManagementSystem.ui.theme.MyTest3Theme
+import com.example.ClassroomManagementSystem.utils.ReservationDao
 
 @Composable
 fun AdminScreen(modifier: Modifier,navController: NavController) {

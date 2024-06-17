@@ -1,14 +1,12 @@
-package com.example.mytest3.utils;
+package com.example.ClassroomManagementSystem.utils;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.util.ArrayList;
-
 public class UserDao {
-    private SQLiteOpenHelper helper;
+    private final SQLiteOpenHelper helper;
     public UserDao(Context context){
 
         helper = new SQLiteOpenHelper(context,"management_system7",null,1);

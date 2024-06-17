@@ -1,10 +1,5 @@
-package com.example.mytest3
+package com.example.ClassroomManagementSystem
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,14 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.mytest3.ui.theme.MyTest3Theme
-import com.example.mytest3.utils.*
+import com.example.ClassroomManagementSystem.ui.theme.MyTest3Theme
+import com.example.ClassroomManagementSystem.utils.*
 
 @Composable
 fun ReserveScreen(userId:String,roomId:String, modifier: Modifier,navController: NavController) {
