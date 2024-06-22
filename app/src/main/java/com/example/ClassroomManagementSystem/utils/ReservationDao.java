@@ -5,102 +5,125 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ReservationDao{
-    private final SQLiteOpenHelper helper;
-    public ReservationDao(Context context){
-        helper = new SQLiteOpenHelper(context,"management_system7",null,1);
-    }
     //添加数据
-    public long addReservation(Reservation reservation){
-        //获取数据库对象
-        SQLiteDatabase database=helper.getWritableDatabase();
-        ContentValues values=new ContentValues();
-        //key是数据表的列名，value是要放进去的值
-        values.put("date",reservation.getDate());
-        values.put("room_id",reservation.getRoomId());
-        values.put("user_id",reservation.getUserId());
-        values.put("result",reservation.getResult());
-        //第一个参数表明，第二个参数自动赋值为null的列名，第三个参数数据
-        //返回值long,插入成功行号，插入失败-1
-        long i = -1;
-        i = database.insert("reservations",null,values);
-        //弹出提示信息
-        //关闭数据库
-        database.close();
-        return i;
+    public static boolean addReservation(Reservation reservation, Context context) throws SQLException {
+        Connection dbConn = WebConnect.getConnection(context);
+        String sql = "INSERT INTO reservations (date, room_id, user_id, result) VALUES (?, ?, ?, ?)";
+        try {
+            PreparedStatement pstmt = dbConn.prepareStatement(sql);
+
+            pstmt.setString(1, reservation.getDate());
+            pstmt.setInt(2, reservation.getRoomId());
+            pstmt.setInt(3, reservation.getUserId());
+            pstmt.setInt(4, reservation.getResult());
+
+            int affectedRows = pstmt.executeUpdate();
+
+            dbConn.close();
+            if (affectedRows > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        dbConn.close();
+        return false;
     }
     //删除
-    public long deleteReservation(String date, String roomId){
-        //获取数据库对象
-        SQLiteDatabase database = helper.getWritableDatabase();
-        //第一个参数表明，第二个参数为删除条件，第三个参数为第二个参数中占位符所需值组成的字符串数组
-        long i = database.delete("reservations","date=? and room_id=?",new String[]{date,roomId});
-        //关闭数据库
-        database.close();
-        return i;
+    public static boolean deleteReservation(String date, int roomId, Context context) throws SQLException {
+        Connection dbConn = WebConnect.getConnection(context);
+        String sql = "DELETE FROM reservations WHERE date = ? AND room_id = ?";
+        try {
+            PreparedStatement pstmt = dbConn.prepareStatement(sql);
+            pstmt.setString(1, date);
+            pstmt.setInt(2, roomId);
+            int affectedRows = pstmt.executeUpdate();
+            dbConn.close();
+            if (affectedRows > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        dbConn.close();
+        return false;
     }
     //更新:根据room_id和date,以result更新预约信息，返回更新行数
-    public long updateReservation(String date, String roomId, int result){
-        //获取数据库对象
-        SQLiteDatabase database = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("result",result);
-        //第一个参数表明，第二个参数为更新数据，第三个参数为更新条件，第四个参数为第三个参数中占位符所需值组成的字符串数组
-        long i = database.update("reservations",values,"date=? and room_id=?",new String[]{date,roomId});
-//        deleteReservation(date,roomId);
-//        Reservation reservation = new Reservation(date,roomId,userId,result);
-//        long i = addReservation(reservation);
-        //关闭数据库
-        database.close();
-        return i;
+    public static boolean updateReservation(String date, int roomId, int result, Context context) throws SQLException {
+        Connection dbConn = WebConnect.getConnection(context);
+        String sql = "UPDATE reservations SET result = ? WHERE date = ? AND room_id = ?";
+        try {
+            PreparedStatement pstmt = dbConn.prepareStatement(sql);
+            pstmt.setInt(1, result);
+            pstmt.setString(2, date);
+            pstmt.setInt(3, roomId);
+            int affectedRows = pstmt.executeUpdate();
+            dbConn.close();
+            if (affectedRows > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        dbConn.close();
+        return false;
     }
     //查询:根据room_id和date查询预约信息，不存在返回null
-    public Reservation queryReservation(String date, String roomId){
-        SQLiteDatabase database = helper.getWritableDatabase();
-        Reservation reservation = null;
-        Cursor cursor = database.query("reservations",null,"date=? and room_id=?",new String[]{date,roomId},null,null,null);
-        if(cursor != null && cursor.moveToFirst()){
-            int temp1 = cursor.getColumnIndex("date");
-            int temp2 = cursor.getColumnIndex("room_id");
-            int temp3 = cursor.getColumnIndex("user_id");
-            int temp4 = cursor.getColumnIndex("result");
-            if(temp1 != -1 && temp2 != -1 && temp3 != -1 && temp4 != -1){
-                reservation = new Reservation(cursor.getString(temp1),cursor.getString(temp2),
-                        cursor.getString(temp3),cursor.getInt(temp4));
+    public static Reservation queryReservation(String date, int roomId, Context context) throws SQLException {
+        Connection dbConn = WebConnect.getConnection(context);
+        String sql = "SELECT * FROM reservations WHERE date = ? AND room_id = ?";
+        try {
+            PreparedStatement pstmt = dbConn.prepareStatement(sql);
+            pstmt.setString(1, date);
+            pstmt.setInt(2, roomId);
+            ResultSet rs = pstmt.executeQuery();
+            dbConn.close();
+            if (rs.next()) {
+                return new Reservation(rs.getString("date"), rs.getInt("room_id"),
+                        rs.getInt("user_id"), rs.getInt("result"));
             }
-            cursor.close();
-        }
-        return reservation;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }dbConn.close();
+        return null;
     }
     //获取某room所有预约信息
-    public ArrayList<Reservation> getReservationsByRoomId(String roomId){
-        ArrayList<Reservation> allReservation = getAllReservations();
+    public static ArrayList<Reservation> getReservationsByRoomId(int roomId, Context context) throws SQLException {
+        ArrayList<Reservation> allReservation = getAllReservations(context);
         ArrayList<Reservation> allReservationOfRoom = new ArrayList<>();
+        assert allReservation != null;
         for(Reservation reservation:allReservation){
-            String temp = reservation.getRoomId();
-            if(temp.equals(roomId)){
+            int temp = reservation.getRoomId();
+            if(temp == roomId){
                 allReservationOfRoom.add(reservation);
             }
         }
         return allReservationOfRoom;
     }
     //获取某用户所有预约信息
-    public ArrayList<Reservation> getReservationsByUserId(String userId){
-        ArrayList<Reservation> allReservation = getAllReservations();
+    public static ArrayList<Reservation> getReservationsByUserId(int userId, Context context) throws SQLException {
+        ArrayList<Reservation> allReservation = getAllReservations(context);
         ArrayList<Reservation> userReservation = new ArrayList<>();
+        assert allReservation != null;
         for(Reservation reservation:allReservation){
-            if(reservation.getUserId().equals(userId)){
+            if(reservation.getUserId() == userId){
                 userReservation.add(reservation);
             }
         }
         return userReservation;
     }
     //获取所有未处理预约信息
-    public ArrayList<Reservation> getUnprocessedReservations(){
-        ArrayList<Reservation> allReservation = getAllReservations();
+    public static ArrayList<Reservation> getUnprocessedReservations(Context context) throws SQLException {
+        ArrayList<Reservation> allReservation = getAllReservations(context);
         ArrayList<Reservation> UnproReservation = new ArrayList<>();
+        assert allReservation != null;
         for(Reservation reservation:allReservation){
             if(reservation.getResult() == 0){
                 UnproReservation.add(reservation);
@@ -109,23 +132,22 @@ public class ReservationDao{
         return UnproReservation;
     }
     //获取所有预约信息
-    public ArrayList<Reservation> getAllReservations(){
+    public static ArrayList<Reservation> getAllReservations(Context context) throws SQLException {
         ArrayList<Reservation> allReservation = new ArrayList<>();
-        SQLiteDatabase database = helper.getWritableDatabase();
-        Cursor cursor = database.query("reservations",null,null,null,null,null,null);
-        if(cursor != null && cursor.moveToFirst()){
-            do{
-                int temp1 = cursor.getColumnIndex("date");
-                int temp2 = cursor.getColumnIndex("room_id");
-                int temp3 = cursor.getColumnIndex("user_id");
-                int temp4 = cursor.getColumnIndex("result");
-                if(temp1 != -1 && temp2 != -1 && temp3 != -1 && temp4 != -1){
-                    allReservation.add(new Reservation(cursor.getString(temp1),cursor.getString(temp2),
-                            cursor.getString(temp3),cursor.getInt(temp4)));
-                }
-            }while(cursor.moveToNext());
-            cursor.close();
+        Connection dbConn = WebConnect.getConnection(context);
+        String sql = "SELECT * FROM reservations";
+        try {
+            PreparedStatement pstmt = dbConn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                allReservation.add(new Reservation(rs.getString("date"), rs.getInt("room_id"), rs.getInt("user_id"), rs.getInt("result")));
+            }
+            dbConn.close();
+            return allReservation;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return allReservation;
+        dbConn.close();
+        return null;
     }
 }

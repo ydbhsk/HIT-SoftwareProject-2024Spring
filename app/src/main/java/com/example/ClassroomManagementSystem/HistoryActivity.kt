@@ -12,12 +12,22 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ClassroomManagementSystem.ui.theme.MyTest3Theme
+import com.example.ClassroomManagementSystem.utils.Classroom
+import com.example.ClassroomManagementSystem.utils.Reservation
 import com.example.ClassroomManagementSystem.utils.ReservationDao
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.ArrayList
 
 @Composable
 fun HistoryScreen(userId:String, modifier: Modifier,navController: NavController) {
@@ -26,9 +36,9 @@ fun HistoryScreen(userId:String, modifier: Modifier,navController: NavController
             Column {
                 Row(modifier = modifier.padding(innerPadding)){
                     GoBack(modifier = modifier.padding(innerPadding), navController = navController)
-                    Greeting4(userId = userId, modifier = modifier.padding(innerPadding))
+                    Greeting4(userId = userId.toInt(), modifier = modifier.padding(innerPadding))
                 }
-                ReserveList(userId = userId,modifier = modifier.padding(innerPadding))
+                ReserveList(userId = userId.toInt(),modifier = modifier.padding(innerPadding))
                 Text(text = "END",modifier = modifier.padding(innerPadding))
             }
         }
@@ -36,9 +46,9 @@ fun HistoryScreen(userId:String, modifier: Modifier,navController: NavController
 }
 
 @Composable
-fun Greeting4(userId: String, modifier: Modifier = Modifier) {
+fun Greeting4(userId: Int, modifier: Modifier = Modifier) {
     Text(
-        text = userId+"的预约记录",
+        text = userId.toString()+"的预约记录",
         modifier = modifier
     )
 }
@@ -54,22 +64,42 @@ fun GoBack(modifier: Modifier,navController: NavController) {
 }
 
 @Composable
-fun ReserveList(userId:String,modifier: Modifier) {
+fun ReserveList(userId:Int,modifier: Modifier) {
     val context = LocalContext.current
-    val reservationDao = ReservationDao(context)
-    val allReservation = reservationDao.getReservationsByUserId(userId)
-    LazyColumn (modifier = modifier){
-        items(items = allReservation) { item ->
-            Row(modifier = modifier){
-                Text(text = "roomID:"+item.roomId,modifier = modifier)
-                Spacer(modifier = modifier.width(20.dp))
-                Text(text = "date:"+item.date,modifier = modifier)
-                Spacer(modifier = modifier.width(20.dp))
-                when(item.result){
-                    -2 -> Text(text = "已结束",modifier)
-                    -1 -> Text(text = "未通过",modifier)
-                    0 -> Text(text = "未处理",modifier)
-                    1 -> Text(text = "已通过",modifier)
+    var allReservation by remember { mutableStateOf<ArrayList<Reservation>?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(isLoading){
+        withContext(Dispatchers.IO){
+            try {
+                allReservation = ReservationDao.getReservationsByUserId(userId, context)
+            } catch (e: Exception) {
+                allReservation = null
+            }
+            isLoading = false
+        }
+    }
+    if(isLoading){
+        Text(text = "加载中")
+    }
+    else {
+        if(allReservation == null){
+            Text(text = "无预约记录")
+        }
+        else {
+            LazyColumn(modifier = modifier) {
+                items(items = allReservation!!) { item ->
+                    Row(modifier = modifier) {
+                        Text(text = "roomID:" + item.roomId.toString(), modifier = modifier)
+                        Spacer(modifier = modifier.width(20.dp))
+                        Text(text = "date:" + item.date, modifier = modifier)
+                        Spacer(modifier = modifier.width(20.dp))
+                        when (item.result) {
+                            -2 -> Text(text = "已结束", modifier)
+                            -1 -> Text(text = "未通过", modifier)
+                            0 -> Text(text = "未处理", modifier)
+                            1 -> Text(text = "进行中", modifier)
+                        }
+                    }
                 }
             }
         }

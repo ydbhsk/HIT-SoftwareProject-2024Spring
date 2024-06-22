@@ -1,19 +1,19 @@
 package com.example.ClassroomManagementSystem.utils;
 
 public class User {
-    private String id;
+    private int id;
     private String password;
     private int authority;
 
-    public User(String id, String password, int authority) {
+    public User(int id, String password, int authority) {
         this.id = id;
         this.password = password;
         this.authority = authority;
     }
-    public String getId() {
+    public int getUserId() {
         return id;
     }
-    public void setId(String id) {
+    public void setUserId(int id) {
         this.id = id;
     }
     public String getPassword() {
