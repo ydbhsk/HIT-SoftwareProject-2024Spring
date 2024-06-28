@@ -16,14 +16,17 @@ public class Reserve {
         ArrayList<Reservation> allReservation = ReservationDao.getReservationsByRoomId(roomId,context);
         ArrayList<String> allDate = new ArrayList<>();
         for (Reservation reservation : allReservation){
-            allDate.add(reservation.getDate());
+            if(reservation.getResult() == 0 || reservation.getResult() == 1){
+                allDate.add(reservation.getDate());
+            }
         }
         return allDate;
     }
     public static void tryReserve(int roomId, int whichClass , int whichDay, int userId, Context context) throws SQLException {
         String date = whichDay+"-"+whichClass;
         Reservation reservation = new Reservation(date,roomId,userId,0);
-        if(ReservationDao.queryReservation(date,roomId,context) == null){
+        Reservation reservationInDB = ReservationDao.queryReservation(date,roomId,context);
+        if(reservationInDB == null || reservationInDB.getResult() == 0 || reservationInDB.getResult() == 1){
             ReservationDao.addReservation(reservation,context);
         }
     }

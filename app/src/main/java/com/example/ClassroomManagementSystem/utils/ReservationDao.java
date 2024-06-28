@@ -125,7 +125,7 @@ public class ReservationDao{
         ArrayList<Reservation> UnproReservation = new ArrayList<>();
         assert allReservation != null;
         for(Reservation reservation:allReservation){
-            if(reservation.getResult() == 0){
+            if(reservation.getResult() == 0 || reservation.getResult() == 1){
                 UnproReservation.add(reservation);
             }
         }

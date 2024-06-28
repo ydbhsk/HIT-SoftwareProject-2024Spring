@@ -1,80 +1,126 @@
 package com.example.ClassroomManagementSystem
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.RotateLeft
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageShader
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.ClassroomManagementSystem.ui.theme.MyTest3Theme
+import com.example.ClassroomManagementSystem.uiItem.NavigationItem
 import com.example.ClassroomManagementSystem.utils.Classroom
 import com.example.ClassroomManagementSystem.utils.ClassroomDao
-import com.example.ClassroomManagementSystem.utils.Reservation
-import com.example.ClassroomManagementSystem.utils.ReservationDao
+import com.example.ClassroomManagementSystem.utils.Constant
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 
 @Composable
 fun UserScreen(userId:String,modifier: Modifier,navController: NavController) {
-    MyTest3Theme {
-        Scaffold(modifier = Modifier.fillMaxSize()){innerPadding ->
-            Column {
-                Greeting3(
-                    userId = userId.toInt(),
-                    modifier = modifier.padding(innerPadding)
-                )
-                Column(modifier = modifier) {
-                    RoomList1(
-                        userId = userId.toInt(),
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .weight(0.99f),
-                        navController = navController
-                    )
-                    Spacer(modifier = Modifier
-                        .padding(innerPadding)
-                        .weight(0.01f))
-                    UserNavigater(
-                        userId = userId.toInt(),
-                        modifier = modifier.padding(innerPadding),
-                        navController = navController
+    val navigationItem = listOf(
+        NavigationItem(title = "预约历史", icon =  Icons.Filled.History),
+        NavigationItem(title = "教室列表", icon =  Icons.Filled.Home),
+        NavigationItem(title = "退出登录", icon =  Icons.Filled.Logout)
+    )
+    var currentNavigationIndex by remember { mutableStateOf(1) }
+    var currentPage by remember { mutableStateOf("") }
+    Scaffold(modifier = Modifier.fillMaxSize(),
+        topBar = {
+            Row(modifier = Modifier.statusBarsPadding()){
+                when(currentNavigationIndex){
+                    0 -> currentPage = "预约历史"
+                    1 -> currentPage = "教室列表"
+                }
+                Text(text = "当前界面：${currentPage}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.weight(0.2f))
+                Text(text = "你好，${userId}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold)
+            }
+        },
+        bottomBar = {
+            NavigationBar(containerColor = Color(0xFF2196F3),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(Constant.bottomNavigationHeight.dp),
+            ) {
+                navigationItem.forEachIndexed {index, item ->
+                    NavigationBarItem(
+                        selected = currentNavigationIndex == index,
+                        onClick = {
+                            currentNavigationIndex = index
+                            if(index == 2){
+                                navController.navigate("homeScreen")
+                            }
+                        },
+                        icon = {
+                            Icon(imageVector = item.icon,
+                                contentDescription = null,)
+                        },
+                        label = {
+                            Text(text = item.title)
+                        },
+                        alwaysShowLabel = false,
                     )
                 }
             }
+        }){padding->
+        when(currentNavigationIndex){
+            0 -> ReservationList(userId = userId.toInt(),
+                modifier = modifier.padding(padding))
+            1 -> RoomList(userId = userId.toInt(),
+                modifier = modifier.padding(padding),
+                navController = navController)
         }
     }
 }
 
-@Composable
-fun Greeting3(userId: Int, modifier: Modifier) {
-    Text(
-        text = userId.toString()+" 欢迎使用教室管理系统",
-        modifier = modifier
-    )
-}
-
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun RoomList1(userId: Int,modifier: Modifier, navController: NavController) {
+fun RoomList(userId: Int,modifier: Modifier, navController: NavController) {
     val context = LocalContext.current
     var allClassroom by remember { mutableStateOf<ArrayList<Classroom>?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -90,59 +136,57 @@ fun RoomList1(userId: Int,modifier: Modifier, navController: NavController) {
         }
     }
     if(isLoading){
-        Text(text = "加载中")
+        LoadingScreen()
     }
     else {
         if (allClassroom == null) {
-            Text(text = "无可用教室")
+            NullScreen()
         }
         else{
             LazyColumn(
                 modifier = modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .padding(bottom = Constant.bottomNavigationHeight.dp)
+                    .navigationBarsPadding()
             ) {
                 items(items = allClassroom!!) { item ->
-                    Row {
-                        Column(modifier = Modifier.fillMaxWidth(0.5f)) {
-                            Text(text = item.position)
-                        }
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(1.dp)
+                        .height(50.dp)) {
+                        Text(text = item.position,
+                            color = Color(0xFF333333),
+                            fontSize = 16.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(bottom = 8.dp)
+                        )
                         Button(
                             onClick = {
                                 navController.navigate("reserveScreen/${userId}/${item.id}/${item.position}")
                             },
-                            modifier = Modifier.fillMaxWidth(0.5f)
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(bottom = 8.dp)
                         ) {
                             Text(text = "预约")
                         }
+                        Text(text = "INFO:${item.id}",
+                            color = Color(0xFF333333),
+                            fontSize = 10.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(bottom = 8.dp)
+                        )
                     }
+                    Divider()
                 }
             }
+            Spacer(modifier = Modifier.height(Constant.bottomNavigationHeight.dp))
         }
     }
 }
-
-@Composable
-fun UserNavigater(userId: Int,modifier: Modifier = Modifier,navController: NavController) {
-    Row(modifier = modifier.fillMaxWidth()){
-        Button(onClick = {
-            navController.navigate("historyScreen/${userId}")
-        }, modifier = modifier.weight(0.4f)) {
-            Text(text = "预约查询")
-        }
-        Spacer(modifier = modifier.weight(0.2f))
-        Button(onClick = {
-            navController.navigate("homeScreen")
-        }, modifier = modifier.weight(0.4f)) {
-            Text(text = "退出登录")
-        }
-    }
-}
-
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview3() {
-//    MyTest3Theme {
-//        UserScreen(userId = "default123", modifier = Modifier,navController = rememberNavController())
-//    }
-//}
