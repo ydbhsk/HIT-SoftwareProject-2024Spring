@@ -14,4 +14,6 @@ public class Constant {
     }};
 
     public static int bottomNavigationHeight = 100;
+    public static int TopNavigationHeight = 50;
+    public static int GridHeight = 50;
 }

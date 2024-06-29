@@ -19,7 +19,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.ClassroomManagementSystem.ui.theme.MyTest3Theme
+import com.example.ClassroomManagementSystem.utils.Constant
 import com.example.ClassroomManagementSystem.utils.ReservationDao
 import com.example.ClassroomManagementSystem.utils.Reserve
 import kotlinx.coroutines.CoroutineScope
@@ -71,10 +75,20 @@ fun ReserveScreen(userId:String,roomId:String,position: String, modifier: Modifi
                         )
                     }
                 },
+                modifier = Modifier
+                    .fillMaxWidth()
             )
         },){padding ->
-        ReserveList(userId = userId.toInt(),roomId = roomId.toInt(),
-            position = position,modifier = modifier.padding(padding),navController = navController)
+        Box(modifier = Modifier.fillMaxSize()){
+            ColorScreen()
+            ReserveList(
+                userId = userId.toInt(),
+                roomId = roomId.toInt(),
+                position = position,
+                modifier = modifier.padding(padding),
+                navController = navController
+            )
+        }
     }
 }
 @Composable
@@ -82,17 +96,10 @@ fun ReserveList(userId:Int, roomId: Int, position: String,modifier: Modifier,nav
     val context = LocalContext.current
     var reserve by remember { mutableStateOf<Reserve?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    val header = listOf("星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日")
-    val rows = mutableListOf<List<Boolean>>()
-    for(i in 1..12) {
-        val row = mutableListOf<Boolean>()
-        for(j in 1..7){
-            row.add(false)
-        }
-        rows.add(row)
-    }
+    val header = listOf("一", "二", "三", "四", "五", "六", "日")
+    val rows = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
     LaunchedEffect(isLoading) {
-        withContext(Dispatchers.IO){// 异步获取数据
+        withContext(Dispatchers.IO) {// 异步获取数据
             try {
                 reserve = Reserve(roomId, context)
             } catch (e: Exception) {
@@ -101,87 +108,73 @@ fun ReserveList(userId:Int, roomId: Int, position: String,modifier: Modifier,nav
             isLoading = false
         }
     }
-    if(isLoading){
+    if (isLoading) {
         LoadingScreen()
-    }
-    else {
+    } else {
         if (reserve == null) {
             NullScreen()
-        }
-        else{
-//            LazyColumn(){
-//                item{
-//                    LazyRow(
-//                        modifier = Modifier.fillMaxWidth(),
-//                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-//                    ) {
-//                        items(header.size) { index ->
-//                            Box(
-//                                modifier = Modifier
-//                                    .background(Color.Gray)
-//                                    .padding(8.dp),
-//                                contentAlignment = Alignment.Center
-//                            ) {
-//                                Text(text = header[index], color = Color.White)
-//                            }
-//                        }
-//                    }
-//                }
-//                items(rows.size){index->
-//                    LazyRow {
-//
-//                    }
-//
-//                }
-//            }
-
-
-
-
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.End
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = Constant.TopNavigationHeight.dp),
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(1f),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Spacer(modifier = Modifier.width(55.dp))
-                        for (i in 1..7) {
-                            Text("$i")
-                            Spacer(modifier = Modifier.width(40.dp))
+                item {
+                    Box(modifier = Modifier.height(Constant.GridHeight.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = null,
+                                modifier = Modifier.width(40.dp)
+                            )
+                            Spacer(modifier = Modifier.width(20.dp))
+                            for (i in 1..7) {
+                                Text(header[i - 1], fontSize = 20.sp)
+                                Spacer(modifier = Modifier.width(32.dp))
+                            }
                         }
                     }
-                    for (i in 1..12) {
+                }
+                items(12) { whichClass ->
+                    Box(modifier = Modifier.height(Constant.GridHeight.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Text(
-                                "$i",
+                                "${whichClass + 1}",
                                 modifier = Modifier.width(40.dp)
                             )
-                            for (j in 1..7) {
+                            for (whichDay in 1..7) {
                                 Button(
                                     onClick = {
                                         CoroutineScope(Dispatchers.IO).launch {
-                                            try{
-                                                Reserve.tryReserve(roomId, j, i, userId, context)
-                                                withContext(Dispatchers.Main) {
-                                                    Toast.makeText(context, "预约成功",
-                                                        Toast.LENGTH_SHORT).show()
-                                                    navController.navigate(
-                                                        "reserveScreen/${userId}/${roomId}/${position}")
+                                            try {
+                                                val tryResult = Reserve.tryReserve(
+                                                    roomId, whichClass + 1,
+                                                    whichDay, userId, context
+                                                )
+                                                if(tryResult){
+                                                    withContext(Dispatchers.Main) {
+                                                        Toast.makeText(
+                                                            context, "预约成功",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        navController.navigate(
+                                                            "reserveScreen/${userId}/${roomId}/${position}"
+                                                        )
+                                                    }
                                                 }
-                                            }catch (e: Exception){
+                                            } catch (e: Exception) {
                                                 withContext(Dispatchers.Main) {
-                                                    Toast.makeText(context, "预约失败",
-                                                        Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(
+                                                        context, "预约失败",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
                                                 }
                                             }
                                         }
@@ -191,7 +184,13 @@ fun ReserveList(userId:Int, roomId: Int, position: String,modifier: Modifier,nav
                                         .height(48.dp)
                                         .padding(PaddingValues(2.dp)),
                                     shape = CutCornerShape(0.dp),
-                                    enabled = !reserve?.isReserved(j, i)!!
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF92F3FF),
+                                        disabledContainerColor = Color(0xFFACACAC),
+                                        contentColor = Color(0xFFFFFFFF),
+                                        disabledContentColor = Color(0xFFE2E2E2)
+                                    ),
+                                    enabled = !reserve?.isReserved(whichClass + 1, whichDay)!!
                                 ) {}
                             }
                         }

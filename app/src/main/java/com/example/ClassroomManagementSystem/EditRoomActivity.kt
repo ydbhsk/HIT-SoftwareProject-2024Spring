@@ -70,8 +70,8 @@ fun EditScreen(modifier: Modifier,navController: NavController) {
             FloatingActionButton(onClick = {
                 addmode = !addmode
             },
-                modifier = Modifier
-                    .padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+                containerColor = Color(0xFF79C3FF),
             ) {
                 if(addmode){
                     Icon(Icons.Default.Remove, contentDescription = null)
@@ -80,7 +80,8 @@ fun EditScreen(modifier: Modifier,navController: NavController) {
                 }
             }
         }){ innerPadding ->
-        Box(modifier = Modifier){
+        Box(modifier = Modifier.fillMaxSize()){
+            ColorScreen()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -267,7 +268,7 @@ fun EditForm(modifier: Modifier,navController: NavController) {
             Button(
                 onClick = {
                     // 提交表单
-                    if(InputCheck.checkRoomId(roomId) || InputCheck.checkPosition(position)){
+                    if(!InputCheck.checkRoomId(roomId) || !InputCheck.checkPosition(position)){
                         Toast.makeText(context, "输入不合法", Toast.LENGTH_SHORT).show()
                         return@Button
                     }

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.RotateLeft
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -82,7 +83,7 @@ fun UserScreen(userId:String,modifier: Modifier,navController: NavController) {
             }
         },
         bottomBar = {
-            NavigationBar(containerColor = Color(0xFF2196F3),
+            NavigationBar(containerColor = Color(0xFF1E35C2),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(Constant.bottomNavigationHeight.dp),
@@ -98,22 +99,33 @@ fun UserScreen(userId:String,modifier: Modifier,navController: NavController) {
                         },
                         icon = {
                             Icon(imageVector = item.icon,
-                                contentDescription = null,)
+                                contentDescription = null,
+                                tint = Color.White,)
                         },
                         label = {
-                            Text(text = item.title)
+                            Text(text = item.title,
+                                color = Color.White,)
                         },
                         alwaysShowLabel = false,
                     )
                 }
             }
         }){padding->
-        when(currentNavigationIndex){
-            0 -> ReservationList(userId = userId.toInt(),
-                modifier = modifier.padding(padding))
-            1 -> RoomList(userId = userId.toInt(),
-                modifier = modifier.padding(padding),
-                navController = navController)
+        Box(modifier = Modifier.fillMaxSize()){
+            // 渐变图层
+            ColorScreen()
+            when (currentNavigationIndex) {
+                0 -> ReservationList(
+                    userId = userId.toInt(),
+                    modifier = modifier.padding(padding)
+                )
+
+                1 -> RoomList(
+                    userId = userId.toInt(),
+                    modifier = modifier.padding(padding),
+                    navController = navController
+                )
+            }
         }
     }
 }
@@ -146,8 +158,8 @@ fun RoomList(userId: Int,modifier: Modifier, navController: NavController) {
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(bottom = Constant.bottomNavigationHeight.dp)
-                    .navigationBarsPadding()
+//                    .padding(bottom = Constant.bottomNavigationHeight.dp)
+//                    .navigationBarsPadding()
             ) {
                 items(items = allClassroom!!) { item ->
                     Box(modifier = Modifier
@@ -169,7 +181,11 @@ fun RoomList(userId: Int,modifier: Modifier, navController: NavController) {
                             },
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(bottom = 8.dp)
+                                .padding(bottom = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF2E3EA0),
+                                contentColor = Color.White
+                            )
                         ) {
                             Text(text = "预约")
                         }

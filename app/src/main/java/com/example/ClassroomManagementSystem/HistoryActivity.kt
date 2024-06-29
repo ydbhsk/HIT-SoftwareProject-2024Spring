@@ -65,8 +65,9 @@ fun ReservationList(userId:Int,modifier: Modifier) {
         else {
             LazyColumn(modifier = modifier
                 .fillMaxSize()
-                .padding(bottom = Constant.bottomNavigationHeight.dp)
-                .navigationBarsPadding()) {
+//                .padding(bottom = Constant.bottomNavigationHeight.dp)
+//                .navigationBarsPadding()
+            ) {
                 items(items = allReservation!!) { item ->
                     val whichDay = item.date.split("-")[0]
                     val whichClass = item.date.split("-")[1]

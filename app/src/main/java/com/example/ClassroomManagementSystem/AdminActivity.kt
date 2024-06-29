@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -95,21 +96,31 @@ fun AdminScreen(modifier: Modifier,navController: NavController) {
                         },
                         icon = {
                             Icon(imageVector = item.icon,
-                                contentDescription = null,)
+                                contentDescription = null,
+                                tint = Color.White,)
                         },
                         label = {
-                            Text(text = item.title)
+                            Text(text = item.title,
+                                color = Color.White,)
                         },
                         alwaysShowLabel = false,
                     )
                 }
             }
         }){ padding->
-        when(currentNavigationIndex){
-            0 -> EditScreen(modifier = modifier.padding(padding),
-                navController = navController)
-            1 -> ReservationList(modifier = modifier.padding(padding),
-                navController = navController)
+        Box(modifier = Modifier.fillMaxSize()){
+            ColorScreen()
+            when (currentNavigationIndex) {
+                0 -> EditScreen(
+                    modifier = modifier.padding(padding),
+                    navController = navController
+                )
+
+                1 -> ReservationList(
+                    modifier = modifier.padding(padding),
+                    navController = navController
+                )
+            }
         }
     }
 }
@@ -146,8 +157,6 @@ fun ReservationList(modifier: Modifier,navController: NavController){
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(bottom = Constant.bottomNavigationHeight.dp)
-//                    .navigationBarsPadding()
             ) {
                 items(items = allReservations!!) { item ->
                     val whichDay = item.date.split("-")[0]
@@ -191,6 +200,7 @@ fun ReservationList(modifier: Modifier,navController: NavController){
                                     ReservationDao.updateReservation(
                                         item.date,
                                         item.roomId,
+                                        item.userId,
                                         1,
                                         context
                                     )
@@ -202,7 +212,11 @@ fun ReservationList(modifier: Modifier,navController: NavController){
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(bottom = 8.dp),
-                            enabled = item.result == 0
+                            enabled = item.result == 0,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF2E3EA0),
+                                contentColor = Color.White
+                            )
                         ) {
                             Text(text = "通过")
                         }
@@ -222,6 +236,7 @@ fun ReservationList(modifier: Modifier,navController: NavController){
                                         ReservationDao.updateReservation(
                                             item.date,
                                             item.roomId,
+                                            item.userId,
                                             -1,
                                             context
                                         )
@@ -229,6 +244,7 @@ fun ReservationList(modifier: Modifier,navController: NavController){
                                         ReservationDao.updateReservation(
                                             item.date,
                                             item.roomId,
+                                            item.userId,
                                             -2,
                                             context
                                         )
@@ -240,7 +256,11 @@ fun ReservationList(modifier: Modifier,navController: NavController){
                             },
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
-                                .padding(bottom = 8.dp)
+                                .padding(bottom = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF2E3EA0),
+                                contentColor = Color.White
+                            )
                         ) {
                             if(item.result == 1){ Text(text = "结束") }
                             else{ Text(text = "退回") }

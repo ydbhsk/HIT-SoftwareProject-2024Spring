@@ -3,6 +3,7 @@ package com.example.ClassroomManagementSystem
 import androidx.compose.material3.TextFieldColors
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.text.style.BackgroundColorSpan
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -174,10 +175,17 @@ fun NullScreen(){
     }
 }
 
-// 登录界面
 @Composable
-fun LoginScreen(modifier: Modifier, navController: NavController) {
+fun BackGroundScreen(){
+    // 背景图层
+    Image(painter = painterResource(id = R.drawable.loginbackground),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop)
+}
 
+@Composable
+fun ColorScreen(){
     //屏幕信息
     var screenWidth:Float
     var screenHeight:Float
@@ -185,6 +193,32 @@ fun LoginScreen(modifier: Modifier, navController: NavController) {
         screenWidth = LocalConfiguration.current.screenWidthDp.dp.toPx()
         screenHeight = LocalConfiguration.current.screenHeightDp.dp.toPx()
     }
+    // 渐变图层
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(
+            Brush.linearGradient(
+                listOf(Color(0xffb3e5fc), Color.Transparent),
+                start = Offset(x = screenWidth, y = 0f),
+                end = Offset(x = 0f, y = screenHeight)
+            )
+        )
+    )
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(
+            Brush.linearGradient(
+                listOf(Color(0xFF3F51B5), Color.Transparent),
+                start = Offset(x = 0f, y = screenHeight),
+                end = Offset(x = screenWidth, y = 0f)
+            )
+        )
+    )
+}
+
+// 登录界面
+@Composable
+fun LoginScreen(modifier: Modifier, navController: NavController) {
     //用户名
     var user_id by remember{ mutableStateOf("") }
     var password by remember{ mutableStateOf("") }
@@ -193,31 +227,9 @@ fun LoginScreen(modifier: Modifier, navController: NavController) {
     var showPassword by remember{ mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxSize()){
         // 背景图层
-        Image(painter = painterResource(id = R.drawable.loginbackground),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop)
+        BackGroundScreen()
         // 渐变图层
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    listOf(Color(0xffb3e5fc), Color.Transparent),
-                    start = Offset(x = screenWidth, y = 0f),
-                    end = Offset(x = 0f, y = screenHeight)
-                )
-            )
-        )
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    listOf(Color(0xFF3F51B5), Color.Transparent),
-                    start = Offset(x = 0f, y = screenHeight),
-                    end = Offset(x = screenWidth, y = 0f)
-                )
-            )
-        )
+        ColorScreen()
         // 登录界面
         Column (
             modifier = Modifier

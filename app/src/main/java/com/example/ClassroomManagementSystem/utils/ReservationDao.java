@@ -1,9 +1,6 @@
 package com.example.ClassroomManagementSystem.utils;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -56,14 +53,15 @@ public class ReservationDao{
         return false;
     }
     //更新:根据room_id和date,以result更新预约信息，返回更新行数
-    public static boolean updateReservation(String date, int roomId, int result, Context context) throws SQLException {
+    public static boolean updateReservation(String date, int roomId,int userId, int result, Context context) throws SQLException {
         Connection dbConn = WebConnect.getConnection(context);
-        String sql = "UPDATE reservations SET result = ? WHERE date = ? AND room_id = ?";
+        String sql = "UPDATE reservations SET result = ? WHERE date = ? AND room_id = ? AND user_id = ?";
         try {
             PreparedStatement pstmt = dbConn.prepareStatement(sql);
             pstmt.setInt(1, result);
             pstmt.setString(2, date);
             pstmt.setInt(3, roomId);
+            pstmt.setInt(4, userId);
             int affectedRows = pstmt.executeUpdate();
             dbConn.close();
             if (affectedRows > 0) {
@@ -75,24 +73,36 @@ public class ReservationDao{
         dbConn.close();
         return false;
     }
-    //查询:根据room_id和date查询预约信息，不存在返回null
-    public static Reservation queryReservation(String date, int roomId, Context context) throws SQLException {
-        Connection dbConn = WebConnect.getConnection(context);
-        String sql = "SELECT * FROM reservations WHERE date = ? AND room_id = ?";
-        try {
-            PreparedStatement pstmt = dbConn.prepareStatement(sql);
-            pstmt.setString(1, date);
-            pstmt.setInt(2, roomId);
-            ResultSet rs = pstmt.executeQuery();
-            dbConn.close();
-            if (rs.next()) {
-                return new Reservation(rs.getString("date"), rs.getInt("room_id"),
-                        rs.getInt("user_id"), rs.getInt("result"));
+    //查询:根据room_id和date和userId查询预约信息，不存在返回null
+    public static Reservation queryReservation(String date, int roomId, int userId, Context context) throws SQLException {
+        ArrayList<Reservation> allReservation = getAllReservations(context);
+        Reservation queryReservation = null;
+        assert allReservation != null;
+        for(Reservation reservation:allReservation){
+            if(reservation.getRoomId() == roomId
+                    && reservation.getDate().equals(date)
+                    && reservation.getUserId() == userId){
+                queryReservation = reservation;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }dbConn.close();
-        return null;
+        }
+        return queryReservation;
+//        Connection dbConn = WebConnect.getConnection(context);
+//        String sql = "SELECT * FROM reservations WHERE date = ? AND room_id = ? AND user_id = ?";
+//        try {
+//            PreparedStatement pstmt = dbConn.prepareStatement(sql);
+//            pstmt.setString(1, date);
+//            pstmt.setInt(2, roomId);
+//            pstmt.setInt(3, userId);
+//            ResultSet rs = pstmt.executeQuery();
+//            dbConn.close();
+//            if (rs.next()) {
+//                return new Reservation(rs.getString("date"), rs.getInt("room_id"),
+//                        rs.getInt("user_id"), rs.getInt("result"));
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }dbConn.close();
+//        return null;
     }
     //获取某room所有预约信息
     public static ArrayList<Reservation> getReservationsByRoomId(int roomId, Context context) throws SQLException {
